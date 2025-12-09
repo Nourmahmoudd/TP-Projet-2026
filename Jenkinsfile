@@ -26,7 +26,7 @@ pipeline {
 
         stage('Clean') {
             steps {
-                dir('TP-Projet-2026') {   // chemin corrigé
+                dir('TP-Projet-2025') {   // chemin corrigé
                     sh "mvn clean"
                 }
             }
@@ -42,7 +42,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                dir('TP-Projet-2026') {
+                dir('TP-Projet-2025') {
                     withSonarQubeEnv('sonarqube') {
                         sh """
                         mvn sonar:sonar \
