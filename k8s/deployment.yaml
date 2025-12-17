@@ -18,4 +18,4 @@ spec:
         - name: tp-2025
           image: tp2025/tp-2025:1.0
           ports:
-            - containerPort: 9091
+            - containerPort: 8080
