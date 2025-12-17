@@ -2,71 +2,56 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JAVA_HOME'      // à adapter si tu utilises une autre version dans Jenkins
-        maven 'M2_HOME'      // le nom que tu as donné à Maven dans Jenkins
-    }
-
-    environment {
-        SONAR_TOKEN = credentials('sonar-token')  // ton token SonarQube
+        maven 'M2_HOME'
+        jdk 'JAVA_HOME'
     }
 
     stages {
-
         stage('Checkout') {
-            steps {
-                checkout([$class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/Nourmahmoudd/TP-Projet-2026.git',
-                        credentialsId: 'git-credentials'
-                    ]]
-                ])
-            }
+            steps { checkout scm }
         }
 
-        stage('Clean') {
-            steps {
-                dir('TP-Projet-2026') {   // chemin corrigé
-                    sh "mvn clean"
-                }
-            }
-        }
-
-        stage('Compile') {
-            steps {
-                dir('TP-Projet-2025') {
-                    sh "mvn compile"
-                }
-            }
+        stage('Build JAR') {
+            steps { sh 'mvn clean package -DskipTests' }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                dir('TP-Projet-2026') {
-                    withSonarQubeEnv('sonarqube') {
-                        sh """
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    sh '''
                         mvn sonar:sonar \
-                          -Dsonar.projectKey=tp-projet-2026 \
-                          -Dsonar.host.url=http://192.168.33.10:9000 \
-                          -Dsonar.login=${SONAR_TOKEN}
-                        """
-                    }
+                        -Dsonar.projectKey=tp-projet-2025 \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=${SONAR_TOKEN}
+                    '''
                 }
             }
         }
 
-        stage('Package') {
+        stage('Docker Build & Push') {
             steps {
-                dir('TP-Projet-2025') {
-                    sh "mvn package -DskipTests"
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        docker login -u $DOCKER_USER -p $DOCKER_PASS
+                        docker build -t tp2025/tp-2025:1.0 .
+                        docker push tp2025/tp-2025:1.0
+                    '''
                 }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                '''
             }
         }
     }
 
     post {
-        success {
-            archiveArtifacts artifacts: 'TP-Projet-2025/target/*.jar'
-        }
+        success { echo '✅ Pipeline terminé avec succès' }
+        failure { echo '❌ Pipeline échoué' }
     }
 }
