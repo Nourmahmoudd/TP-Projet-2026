@@ -33,8 +33,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                         docker login -u $DOCKER_USER -p $DOCKER_PASS
-                        docker build -t tp2025/tp-2025:1.0 .
-                        docker push tp2025/tp-2025:1.0
+                        docker build -t nourmahmoudd/tp-2025:1.0 .
+                        docker push nourmahmoudd/tp-2025:1.0
                     '''
                 }
             }
