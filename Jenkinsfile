@@ -52,7 +52,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withEnv(['KUBECONFIG=/home/vagrant/.kube/config']) {
+                withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh 'kubectl apply -f k8s/deployment.yaml'
                     sh 'kubectl apply -f k8s/service.yaml'
                 }
