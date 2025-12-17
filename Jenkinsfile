@@ -1,79 +1,72 @@
 pipeline {
     agent any
-    
+
     tools {
-        maven 'M2_HOME'
-        jdk 'JAVA_HOME'
+        jdk 'JAVA_HOME'      // à adapter si tu utilises une autre version dans Jenkins
+        maven 'M2_HOME'      // le nom que tu as donné à Maven dans Jenkins
     }
-    
+
+    environment {
+        SONAR_TOKEN = credentials('sonar-token')  // ton token SonarQube
+    }
+
     stages {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/Nourmahmoudd/TP-Projet-2026.git',
+                        credentialsId: 'git-credentials'
+                    ]]
+                ])
             }
         }
 
         stage('Clean') {
             steps {
-                sh 'mvn clean'
+                dir('TP-Projet-2026') {   // chemin corrigé
+                    sh "mvn clean"
+                }
             }
         }
 
         stage('Compile') {
             steps {
-                sh 'mvn compile'
-            }
-        }
-
-        stage('Build JAR (skip tests)') {
-            steps {
-                echo "📦 Construction du JAR (tests ignorés)..."
-                sh 'mvn package -DskipTests'
-            }
-            
-            post {
-                success {
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                    sh 'ls -lh target/*.jar'
+                dir('TP-Projet-2025') {
+                    sh "mvn compile"
                 }
             }
         }
 
-        stage('SonarQube') {
+        stage('SonarQube Analysis') {
             steps {
-                echo "📊 Analyse SonarQube..."
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh '''
+                dir('TP-Projet-2026') {
+                    withSonarQubeEnv('sonarqube') {
+                        sh """
                         mvn sonar:sonar \
-                        -Dsonar.projectKey=tp-projet-2025 \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=${SONAR_TOKEN} \
-                        -DskipTests
-                    '''
+                          -Dsonar.projectKey=tp-projet-2026 \
+                          -Dsonar.host.url=http://192.168.33.10:9000 \
+                          -Dsonar.login=${SONAR_TOKEN}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                dir('TP-Projet-2025') {
+                    sh "mvn package -DskipTests"
                 }
             }
         }
     }
-    
-    post {
-        always {
-            echo "🔚 Pipeline terminé - Résultat: ${currentBuild.result}"
-            sh '''
-                echo "=== ESPACE DISQUE ==="
-                df -h .
-                echo ""
-                echo "=== FICHIERS GÉNÉRÉS ==="
-                find target -type f -name "*.jar" -o -name "*.class" | wc -l
-            '''
-        }
-        
-        success {
-            echo '✅ Pipeline terminé avec succès'
-        }
 
-        failure {
-            echo '❌ Pipeline en échec'
+    post {
+        success {
+            archiveArtifacts artifacts: 'TP-Projet-2025/target/*.jar'
         }
     }
 }

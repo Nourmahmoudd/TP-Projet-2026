@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tp-2025-deployment
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: tp-2025
+  template:
+    metadata:
+      labels:
+        app: tp-2025
+    spec:
+      containers:
+        - name: tp-2025
+          image: tp2025/tp-2025:1.0
+          ports:
+            - containerPort: 9091
