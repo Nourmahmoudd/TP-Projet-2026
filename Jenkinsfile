@@ -8,11 +8,20 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            steps { checkout scm }
+            steps { 
+                checkout scm 
+            }
         }
 
         stage('Build JAR') {
-            steps { sh 'mvn clean package -DskipTests' }
+            steps { 
+                sh 'mvn clean package -DskipTests' 
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
+            }
         }
 
         stage('SonarQube Analysis') {
@@ -35,6 +44,7 @@ pipeline {
                         docker login -u $DOCKER_USER -p $DOCKER_PASS
                         docker build -t nourmahmoudd/tp-2025:1.0 .
                         docker push nourmahmoudd/tp-2025:1.0
+                        docker logout
                     '''
                 }
             }
@@ -48,9 +58,14 @@ pipeline {
                 }
             }
         }
+    }
 
     post {
-        success { echo '✅ Pipeline terminé avec succès' }
-        failure { echo '❌ Pipeline échoué' }
+        success { 
+            echo '✅ Pipeline terminé avec succès' 
+        }
+        failure { 
+            echo '❌ Pipeline échoué' 
+        }
     }
 }
