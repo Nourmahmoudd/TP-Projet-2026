@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: tp-2025
-          image: tp2025/tp-2025:1.0
+          image: nourmahmoudd/tp-2025:1.0
           ports:
             - containerPort: 8080
