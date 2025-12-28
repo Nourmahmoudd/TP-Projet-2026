@@ -69,7 +69,7 @@ post {
     }
     failure {
         echo '❌ Pipeline échoué'
-        mail to: 'ton.email@exemple.com',
+        mail to: 'nour.mahmoud@esprit.tn',
              subject: "Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
              body: "Le build ${env.JOB_NAME} #${env.BUILD_NUMBER} a échoué.\nVoir Jenkins: ${env.BUILD_URL}"
     }
