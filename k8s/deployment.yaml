@@ -1,21 +1,40 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tp-2025-deployment
+  name: tp-2025-mysql
 spec:
-  replicas: 2
-  strategy:
-    type: RollingUpdate
+  replicas: 1
   selector:
     matchLabels:
-      app: tp-2025
+      app: tp-2025-mysql
   template:
     metadata:
       labels:
-        app: tp-2025
+        app: tp-2025-mysql
     spec:
       containers:
-        - name: tp-2025
-          image: nourmahmoudd/tp-2025:1.0
+        - name: mysql
+          image: mysql:8
           ports:
-            - containerPort: 8080
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_DATABASE
