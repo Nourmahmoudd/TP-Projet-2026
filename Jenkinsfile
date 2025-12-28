@@ -60,12 +60,18 @@ pipeline {
         }
     }
 
-    post {
-        success { 
-            echo '✅ Pipeline terminé avec succès' 
-        }
-        failure { 
-            echo '❌ Pipeline échoué' 
-        }
+post {
+    success {
+        echo '✅ Pipeline terminé avec succès'
+        mail to: 'ton.email@exemple.com',
+             subject: "Pipeline SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+             body: "Le build ${env.JOB_NAME} #${env.BUILD_NUMBER} s'est terminé avec succès.\nVoir Jenkins: ${env.BUILD_URL}"
     }
+    failure {
+        echo '❌ Pipeline échoué'
+        mail to: 'ton.email@exemple.com',
+             subject: "Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+             body: "Le build ${env.JOB_NAME} #${env.BUILD_NUMBER} a échoué.\nVoir Jenkins: ${env.BUILD_URL}"
+    }
+}
 }
