@@ -1,11 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: tp-2025-mysql
+  name: tp-2025-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
-    app: tp-2025-mysql
+    app: tp-2025
   ports:
-    - port: 3306
-      targetPort: 3306
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30007
