@@ -1,11 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: tp-2025-mysql
+  name: mysql-service
 spec:
-  type: ClusterIP
   selector:
-    app: tp-2025-mysql
+    app: mysql
   ports:
-    - port: 3306
-      targetPort: 3306
+  - port: 3306
+    targetPort: 3306
