@@ -16,19 +16,7 @@ spec:
     spec:
       containers:
         - name: tp-2025
+          image: tp2025/tp-2025:1.0
           image: nourmahmoudd/tp-2025:1.0
           ports:
             - containerPort: 8080
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://tp-2025-mysql:3306/tp2025
-            - name: SPRING_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: MYSQL_USER
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: MYSQL_PASSWORD
