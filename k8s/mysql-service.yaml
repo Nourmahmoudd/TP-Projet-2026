@@ -4,6 +4,8 @@ metadata:
   name: tp-2025-mysql
 spec:
   ports:
-    - port: 3306
+    - name: mysql
+      port: 3306
+      targetPort: 3306
   selector:
     app: tp-2025-mysql
