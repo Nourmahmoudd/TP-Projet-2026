@@ -59,7 +59,7 @@ pipeline {
 
 post {
         success {
-            archiveArtifacts artifacts: 'TP-Projet-2025/target/*.jar'
+            archiveArtifacts artifacts: 'target/*.jar'
 
             emailext (
                 subject: "✅ SUCCESS : Pipeline Jenkins - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
