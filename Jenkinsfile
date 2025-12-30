@@ -42,13 +42,16 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh '''
-                    kubectl apply -f k8s/deployment.yaml
-                    kubectl apply -f k8s/service.yaml
-                '''
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
-                    sh 'kubectl apply -f k8s/deployment.yaml'
-                    sh 'kubectl apply -f k8s/service.yaml'
+                    sh '''
+                      kubectl apply -f k8s/mysql-secret.yaml
+                      kubectl apply -f k8s/mysql-deployment.yaml
+                      kubectl apply -f k8s/mysql-service.yaml
+        
+                      kubectl apply -f k8s/deployment.yaml
+                      kubectl apply -f k8s/service.yaml
+                      kubectl apply -f k8s/metrics-service.yaml
+                    '''
                 }
             }
         }
