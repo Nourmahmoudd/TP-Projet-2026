@@ -8,20 +8,11 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            steps { 
-                checkout scm 
-            }
+            steps { checkout scm }
         }
 
         stage('Build JAR') {
-            steps { 
-                sh 'mvn clean package -DskipTests' 
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                }
-            }
+            steps { sh 'mvn clean package -DskipTests' }
         }
 
         stage('SonarQube Analysis') {
@@ -44,7 +35,6 @@ pipeline {
                         docker login -u $DOCKER_USER -p $DOCKER_PASS
                         docker build -t nourmahmoudd/tp-2025:1.0 .
                         docker push nourmahmoudd/tp-2025:1.0
-                        docker logout
                     '''
                 }
             }
@@ -52,30 +42,20 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
+                sh '''
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                '''
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
-                    sh '''
-                      kubectl apply -f k8s/mysql-secret.yaml
-                      kubectl apply -f k8s/mysql-deployment.yaml
-                      kubectl apply -f k8s/mysql-service.yaml
-        
-                      kubectl apply -f k8s/deployment.yaml
-                      kubectl apply -f k8s/service.yaml
-                      kubectl apply -f k8s/metrics-service.yaml
-                    '''
+                    sh 'kubectl apply -f k8s/deployment.yaml'
+                    sh 'kubectl apply -f k8s/service.yaml'
                 }
             }
         }
     }
 
-}
-
-
     post {
-        success { 
-            echo '✅ Pipeline terminé avec succès' 
-        }
-        failure { 
-            echo '❌ Pipeline échoué' 
-        }
+        success { echo '✅ Pipeline terminé avec succès' }
+        failure { echo '❌ Pipeline échoué' }
     }
 }
