@@ -24,14 +24,24 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh '''
-                        mvn sonar:sonar \
-                        -Dsonar.projectKey=tp-projet-2025 \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=${SONAR_TOKEN}
+                      # Déploiement MySQL
+                      kubectl apply -f k8s/mysql-secret.yaml
+                      kubectl apply -f k8s/mysql-deployment.yaml
+                      kubectl apply -f k8s/mysql-service.yaml
+        
+                      # Déploiement de ton application TP-2025
+                      kubectl apply -f k8s/deployment.yaml
+                      kubectl apply -f k8s/service.yaml
+                      kubectl apply -f k8s/metrics-service.yaml
+        
+                      # Déploiement Prometheus
+                      kubectl apply -f k8s/prometheus-deployment.yaml
+                      kubectl apply -f k8s/prometheus-service.yaml
+                      kubectl apply -f k8s/prometheus-configmap.yaml
                     '''
                 }
             }
